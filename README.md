@@ -10,7 +10,7 @@ example: `python csv2sql.py myTable.csv myDb.dbo -setDropOption`
 
 outputs: `<filename.sql>`
 
-SQL Script begins whits 'Create Table [tableRoot].<filename> (`
+SQL Script begins whith 'Create Table [tableRoot].<filename> (`
 
 
 The optional parameter `[-setDropOption]` if included will insert a drop table command into the first line of the SQL script
