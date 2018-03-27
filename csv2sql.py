@@ -162,7 +162,12 @@ class CSVConverter(object):
 			for dict in listOfDicts:
 				for name in var_names:
 					if nameToType[name] == 'DATETIME':
-						dict[name] = self.normalizeDateTime(dict[name])
+						try:
+							dict[name] = self.normalizeDateTime(dict[name])
+						except UnboundLocalError:
+							print('Inconsitent Column Data')
+							print('Defaulting Date to 12/31/2999')
+							dict[name] = str(datetime.date.max)
 					if nameToType[name] == 'INT':
 						
 						dict[name] = dict[name].replace(',','')
