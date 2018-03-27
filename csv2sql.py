@@ -49,8 +49,12 @@ class Twirly(threading.Thread):
 class CSVConverter(object):
 	#add more date format string to catch more date input variations
 	dateFormatStrings = ['%m/%d/%Y','%Y-%m-%dT%H:%M:%S+00:00','%Y-%m-%d %H:%M']
-	def __init__(self, filename):
-		
+	def __init__(self, filename,tableRoot,dropOption=None):
+		if dropOption is not None:
+			self.dropOption = dropOption
+		else:
+			self.dropOption = False
+		self.tableRoot = tableRoot
 		self.filename = filename
 		self.tableName = filename.split('.')[0]
 		self.csvtodictionaryList = []
@@ -177,9 +181,9 @@ class CSVConverter(object):
 
 	@withTwirly
 	def processCSV(self):
-	
-		self.sqlstring = 'DROP TABLE bfallin.dbo.'+self.tableName+'\n'	
-		self.sqlstring += 'CREATE TABLE bfallin.dbo.'+self.tableName+'(\n'
+		if self.dropOption:
+			self.sqlstring = 'DROP TABLE '+self.tableRoot+'.'+self.tableName+'\n'	
+		self.sqlstring += 'CREATE TABLE '+self.tableRoot+'.'+self.tableName+'(\n'
 		self.sqlstring += '\t'+self.tableName+'_ID uniqueidentifier PRIMARY KEY DEFAULT newid(),\n'
 
 		for name in self.columnNames:
@@ -188,7 +192,7 @@ class CSVConverter(object):
 		self.sqlstring += ')\nGO\n'
 
 		for row in self.csvtodictionaryList:
-			self.sqlstring += 'INSERT bfallin.dbo.'+self.tableName+'(\n'
+			self.sqlstring += 'INSERT '+self.tableRoot+'.'+self.tableName+'(\n'
 			for name in self.processAllButLast(self.columnNames):
 				self.sqlstring += '\t'+self.sanitize(name)+',\n'
 
@@ -204,16 +208,30 @@ class CSVConverter(object):
 		return(self.sqlstring)
 	
 	
-
+	def setDropTableDropOption(self,boolean):
+		assert type(boolean) == bool
+		self.dropOption = boolean
 
 	
 if __name__ == "__main__":	
 	
+	dropOption = False
+	
 	try:
 		inputFileName = sys.argv[1]
+		tableRoot = sys.argv[2]
 	except IndexError:
-		print('No Input File:  python csv2sql.py <filname.ext>')
+		print('Invalid command ussage:  python csv2sql.py <filname.csv> <tableRoot> [-setDropOption]')
 		sys.exit(1)
+	try:
+		dropOptionString = sys.argv[3]
+		if dropOptionString != '-setDropOption':
+			print('Invalid paramerter')
+			sys.exit(1)
+		
+		dropOption = True
+	except IndexError:
+		pass
 
 	print('CSV to SQL Conversion 1.0')
 	print('Converting %s to Transact SQL'%inputFileName)
@@ -222,7 +240,8 @@ if __name__ == "__main__":
 	inputfileNameSplit = inputFileName.split('.')
 	outputFileName = inputfileNameSplit[0] + '.sql'
 
-	converter = CSVConverter(inputFileName)
+	converter = CSVConverter(inputFileName,tableRoot,dropOption)
+		
 		
 	outFile = open(outputFileName,'w')
 	outFile.write(converter.getSql())
