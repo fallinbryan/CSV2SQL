@@ -175,6 +175,7 @@ class CSVConverter(object):
 		r_string = i_string.replace(' ','_').replace('.','_').replace('-','_')
 		r_string = r_string.replace('__','_')
 		r_string = r_string.replace('___','_')
+		r_string = r_string.replace('/','')
 		if 'Name' in r_string:
 			r_string = 'T_'+r_string
 		return r_string
