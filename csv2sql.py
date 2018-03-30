@@ -184,6 +184,7 @@ class CSVConverter(object):
 		r_string = r_string.replace('?','')
 		r_string = r_string.replace('(','')
 		r_string = r_string.replace(')','')
+		r_string = r_string.replace('%','')
 		if 'Name' in r_string:
 			r_string = 'T_'+r_string
 		return r_string
