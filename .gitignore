@@ -3,3 +3,5 @@
 *.xlsx
 *.sql
 .idea/
+csv/
+sql/
